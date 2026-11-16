@@ -1,0 +1,11 @@
+# Entorno de referencia (Google Colab, Python 3.11+)
+numpy
+pandas
+pyarrow
+scikit-learn
+matplotlib
+seaborn
+torch
+torchvision
+ydata-profiling
+tqdm

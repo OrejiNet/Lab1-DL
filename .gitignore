@@ -1,0 +1,41 @@
+# ---- Datos (nunca versionar datasets masivos) ----
+data/**
+!data/**/
+!data/**/.gitkeep
+
+# ---- Pesos y checkpoints ----
+checkpoints/**
+!checkpoints/**/
+!checkpoints/**/.gitkeep
+*.pt
+*.pth
+*.ckpt
+
+# ---- Reportes pesados generados ----
+reports/**
+!reports/**/
+!reports/**/.gitkeep
+
+# ---- Archivos de datos sueltos ----
+*.csv
+*.parquet
+*.feather
+*.zip
+*.gz
+*.7z
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# ---- SO / editores ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
