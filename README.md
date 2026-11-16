@@ -12,9 +12,17 @@ Entrega: **22 de noviembre de 2026** (prórroga; el enunciado en `docs/` aún di
 |---|---|
 | N° de grupo | _por definir_ |
 | Integrantes | _por definir_ |
-| Opción de problema | _por definir (A / B / C)_ |
-| Dataset | _por definir_ |
+| Opción de problema | **B — Predicción Científica / Series de Sensores Industriales** |
+| Dataset | **HIGGS Boson Dataset** — [UCI ML Repository, id 280](https://archive.ics.uci.edu/dataset/280/higgs) |
+| Tarea | Clasificación binaria: señal (bosón de Higgs) vs. fondo |
+| Volumen | 11.000.000 de filas disponibles → se usa una **submuestra aleatoria de 1.000.000** |
+| Dimensionalidad | **28 features** (21 cinemáticas de bajo nivel + 7 masas invariantes de alto nivel) |
 | Modelos base exigidos | _según tamaño del grupo: 1 → 2-3, 2 → 4-5, 3 → 6-8_ |
+
+> **Nota sobre el requisito de ≥ 40 columnas:** HIGGS tiene 28 features, por debajo del mínimo
+> que fija el enunciado. El profesor autorizó expresamente usarlo así, dado que el volumen de
+> observaciones (11M disponibles) compensa la menor dimensionalidad. Además, el propio enunciado
+> lista "HIGGS Boson Dataset (200k-1M)" como ejemplo de la Opción B.
 
 ## Objetivo
 
@@ -29,7 +37,8 @@ memoria y cómputo de Google Colab (~12 GB de RAM, 12-24 h de entrenamiento acum
 Lab1-DL/
 ├── docs/                  # Enunciado y planilla de inscripción de grupos (PDF)
 ├── notebooks/
-│   └── 00_codigo_base_profesor.ipynb   # Notebook de ejemplo, sin outputs (referencia)
+│   ├── 00_codigo_base_profesor.ipynb   # Notebook de ejemplo, sin outputs (referencia)
+│   └── 01_EDA_y_Preprocessing.ipynb    # Fase A: carga 1M filas, splits y EDA (listo para Colab)
 ├── src/
 │   └── lab_base.py        # Mismo código base extraído a módulo reutilizable
 ├── data/                  # Datasets (ignorados por git)
@@ -42,13 +51,21 @@ Lab1-DL/
 
 ### Notebooks de entrega (a crear)
 
-El enunciado permite entregar uno o varios `.ipynb`. Plan sugerido:
+El enunciado permite entregar uno o varios `.ipynb`. Plan:
 
-1. `01_EDA_y_Preprocessing.ipynb` — carga eficiente, submuestra 10%, EDA, PCA/t-SNE/K-Means,
-   splits + `StandardScaler` sin data leakage, auditoría con `ydata-profiling compare`.
-2. `02_Modelos_Base.ipynb` — búsqueda progresiva de hiperparámetros (10-20% de los datos),
+1. ✅ `01_EDA_y_Preprocessing.ipynb` — descarga por *chunks*, submuestra de 1M filas, splits
+   estratificados + `StandardScaler` sin data leakage, auditoría con `ydata-profiling compare`,
+   EDA sobre el 10% y análisis no supervisado (PCA / t-SNE / K-Means). **Falta ejecutarlo en Colab.**
+2. ⬜ `02_Modelos_Base.ipynb` — búsqueda progresiva de hiperparámetros (10-20% de los datos),
    entrenamiento final de los M modelos base con Bootstrap, checkpoints en Drive.
-3. `03_Stacking_Ensemble_Final.ipynb` — meta-red de Stacking, evaluación en test, conclusiones.
+3. ⬜ `03_Stacking_Ensemble_Final.ipynb` — meta-red de Stacking, evaluación en test, conclusiones.
+
+### Cómo ejecutar el notebook 01
+
+Súbelo a Google Colab (`Archivo → Subir notebook`), activa GPU en
+`Entorno de ejecución → Cambiar tipo de entorno` y ejecuta las celdas en orden. Escribe todos sus
+artefactos en `MyDrive/Lab1-DL/`. Tiempo estimado: 25-45 min, dominado por la descarga de los
+2.6 GB y la lectura por bloques del `.csv.gz`.
 
 **Condición estricta del enunciado:** los notebooks se entregan **completamente ejecutados**
 (todas las salidas visibles). El profesor no los re-ejecuta.
