@@ -2,7 +2,8 @@
 
 Curso: **Fundamentos de Aprendizaje Profundo y Aplicaciones** — Semestre 2-2026
 Profesor: Francisco Muñoz (`francisco.munoz.b@usach.cl`)
-Entrega: **17 de noviembre de 2026, 23:59 hrs** — asunto del correo: `Lab 1 - DL - [NUMERO GRUPO]`
+Entrega: **22 de noviembre de 2026** (prórroga; el enunciado en `docs/` aún dice 17 de noviembre)
+— por correo, con asunto `Lab 1 - DL - [NUMERO GRUPO]`
 
 > **Por definir:** número de grupo, integrantes y dataset elegido. Completar la tabla de abajo
 > antes de la entrega.
