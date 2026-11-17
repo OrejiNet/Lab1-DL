@@ -35,7 +35,7 @@ memoria y cómputo de Google Colab (~12 GB de RAM, 12-24 h de entrenamiento acum
 
 ```
 Lab1-DL/
-├── docs/                  # Enunciado y planilla de inscripción de grupos (PDF)
+├── docs/                  # Enunciado del laboratorio (PDF)
 ├── notebooks/
 │   ├── 00_codigo_base_profesor.ipynb   # Notebook de ejemplo, sin outputs (referencia)
 │   └── 01_EDA_y_Preprocessing.ipynb    # Fase A: carga 1M filas, splits y EDA (listo para Colab)
