@@ -1,82 +1,131 @@
-\documentclass[10pt,a4paper]{article}
+\documentclass[12pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish,es-noshorthands]{babel}
-\usepackage[margin=2cm]{geometry}
+\usepackage[left=3cm,right=3cm,top=3cm,bottom=3cm]{geometry}
+\usepackage{setspace}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{multirow}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{enumitem}
-\usepackage{xcolor}
-\usepackage[hidelinks]{hyperref}
+\usepackage[round,authoryear]{natbib}
+\usepackage{hyperref}
 
+% Babel en espanol rotula las tablas como "Cuadro" y el indice como
+% "Indice"; el formato del curso usa "Tabla" y "Tabla de contenidos".
+% Babel reasigna estos nombres al abrir el documento, de modo que hay que
+% engancharlos a captionsspanish y no redefinirlos sueltos en el preambulo.
+\addto\captionsspanish{%
+  \renewcommand{\tablename}{Tabla}%
+  \renewcommand{\contentsname}{Tabla de contenidos}%
+  \renewcommand{\refname}{Referencias}%
+  \renewcommand{\bibname}{Referencias}%
+}
+
+\onehalfspacing
+\setlength{\parindent}{1.2em}
 \captionsetup{font=small,labelfont=bf}
-\setlength{\parskip}{0.3em}
-\setlength{\parindent}{0pt}
 
 \newcommand{\figdir}{../../reports/figures}
 
-\title{\vspace{-1.5cm}\textbf{Pipeline de Aprendizaje Profundo sobre Datos Masivos}\\[0.2cm]
-\large Clasificación de eventos de bosón de Higgs mediante Bagging y Stacking Ensemble}
-
-\author{Cristopher Angulo Ahumada \\[0.1cm]
-\small Grupo 6 --- Trabajo individual \\
-\small Fundamentos de Aprendizaje Profundo y Aplicaciones --- Semestre 2-2026 \\
-\small Magíster en Informática}
-
-\date{\small Noviembre de 2026}
-
 \begin{document}
 
-\maketitle
-\vspace{-0.8cm}
+% ============================================================ PORTADA
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{minipage}{0.75\textwidth}
+  \raggedright
+  {\large\bfseries UNIVERSIDAD DE SANTIAGO DE CHILE}\\[0.5cm]
+  {\bfseries FACULTAD DE INGENIERÍA}\\[0.5cm]
+  {\bfseries Departamento de Ingeniería Informática}
+\end{minipage}
+\hfill
+\begin{minipage}{0.2\textwidth}
+  \raggedleft
+  \includegraphics[width=2.4cm]{img/escudo_usach.png}
+\end{minipage}
 
-\begin{abstract}
-\noindent
-Se construye un pipeline completo de aprendizaje profundo sobre el \emph{HIGGS Boson Dataset}
-(11.000.000 de colisiones simuladas), bajo restricciones explícitas de memoria y cómputo. El
-trabajo abarca la carga masiva por bloques de una submuestra de 1.000.000 de filas, el análisis
-exploratorio y no supervisado, la construcción de 23 variables derivadas que elevan el conjunto a
-51 características, la búsqueda progresiva de hiperparámetros con Optuna sobre el 20\,\% de los
-datos, el entrenamiento de tres redes \emph{feed-forward} sobre muestras Bootstrap distintas y su
-combinación mediante una meta-red de Stacking con pesos entrenables. El ensamble alcanza un
-ROC-AUC de \textbf{0,85572} y una exactitud del \textbf{77,13\,\%} sobre un conjunto de prueba de
-150.000 eventos no utilizado durante el desarrollo. El resultado más relevante no es esa cifra
-sino el contraste con la alternativa ingenua: el promedio simple de los tres modelos quedó
-\emph{por debajo} del mejor modelo individual, de modo que aprender los pesos de combinación fue
-lo que separó mejorar de empeorar. Todo el trabajo se ejecutó en CPU, con un consumo máximo de
-memoria de 1,35\,GB y 32 minutos de cómputo acumulado.
-\end{abstract}
+\vspace{2.2cm}
 
-\vspace{-0.3cm}
+\begin{center}
+{\LARGE\bfseries Laboratorio 1: Pipeline de Aprendizaje Profundo\\[0.35cm]
+sobre Datos Masivos\par}
 
-\section{Introducción y justificación del dataset}
+\vspace{0.7cm}
 
-El \emph{HIGGS Boson Dataset}~\cite{baldi2014,uci} contiene 11.000.000 de colisiones simuladas de
-partículas. La tarea es de clasificación binaria: distinguir un evento de \textbf{señal}
----producción de un bosón de Higgs--- de uno de \textbf{fondo}, entendido como un proceso físico
-distinto que genera exactamente los mismos productos de decaimiento observables.
+{\Large\bfseries Clasificación de eventos de bosón de Higgs\\[0.35cm]
+mediante Bagging y Stacking Ensemble\par}
 
-El problema reúne las condiciones que justifican el uso de aprendizaje profundo. Las variables son
-continuas y están fuertemente correlacionadas; las diferencias entre clases son sutiles y no se
-manifiestan en ninguna variable aislada; y el volumen permite ajustar modelos de alta capacidad.
-Las 28 variables se organizan en dos niveles: 21 \textbf{de bajo nivel}, que son mediciones
-directas del detector (momento transversal, pseudorapidez, ángulo azimutal y etiquetado $b$ de
-cada objeto), y 7 \textbf{de alto nivel}, que son masas invariantes construidas por especialistas
-del dominio a partir de las anteriores con el fin explícito de discriminar.
+\vspace{1.8cm}
 
-\paragraph{Cumplimiento de los requisitos.} Se extrae una submuestra aleatoria de
-\textbf{1.000.000 de filas}, dentro del rango exigido. Respecto de la dimensionalidad, el dataset
-aporta 28 columnas y su uso fue autorizado expresamente por el profesor dado el volumen de
-observaciones disponible; adicionalmente, el \emph{feature engineering} de la Fase~B eleva el
-conjunto a \textbf{51 variables}, con lo que el mínimo de 40 columnas queda satisfecho.
+{\large\bfseries Cristopher René Alexander Angulo Ahumada\par}
+\end{center}
 
-\section{Fase A: carga masiva, particiones y análisis exploratorio}
+\vspace{1.8cm}
+
+\begin{flushright}
+\textbf{Profesor:} Francisco Muñoz\\[0.25cm]
+\textbf{Curso:} Fundamentos de Aprendizaje Profundo y Aplicaciones\\[0.25cm]
+\textbf{Programa:} Magíster en Informática\\[0.25cm]
+\textbf{Grupo:} 6 --- Trabajo individual
+\end{flushright}
+
+\vfill
+
+\begin{center}
+\textbf{Santiago -- Chile}\\[0.25cm]
+\textbf{2026}
+\end{center}
+\end{titlepage}
+
+% ============================================================ INDICE
+\newpage
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+\setcounter{page}{1}
+
+% ============================================================ CUERPO
+\section{Descripción del Problema}
+
+El \emph{HIGGS Boson Dataset} \citep{baldi2014, uci} contiene 11.000.000 de colisiones simuladas
+de partículas en un acelerador. La tarea es de clasificación binaria: distinguir un evento de
+\textbf{señal} ---producción de un bosón de Higgs--- de uno de \textbf{fondo}, entendido como un
+proceso físico distinto que genera exactamente los mismos productos de decaimiento observables.
+
+El problema reúne las tres condiciones que justifican el uso de aprendizaje profundo. Las
+variables son continuas y están fuertemente correlacionadas entre sí; las diferencias entre ambas
+clases son sutiles y no se manifiestan en ninguna variable aislada; y el volumen disponible
+permite ajustar modelos de alta capacidad sin incurrir de inmediato en sobreajuste. Es, además, el
+escenario en el que el trabajo original demostró que una red profunda supera a los métodos
+tradicionales de la física de altas energías.
+
+\subsection{Estructura de las variables}
+
+Las 28 variables predictoras se organizan en dos niveles. Las 21 \textbf{de bajo nivel} son
+mediciones directas del detector: para cada objeto reconstruido ---el leptón, la energía
+transversal faltante y hasta cuatro \emph{jets}--- se registra su momento transversal $p_T$, su
+pseudorapidez $\eta$, su ángulo azimutal $\phi$ y, en el caso de los \emph{jets}, su etiquetado
+$b$. Las 7 \textbf{de alto nivel} son masas invariantes construidas por especialistas del dominio
+a partir de las anteriores, con el fin explícito de discriminar señal de fondo; entre ellas
+\texttt{m\_bb}, que en los eventos de señal reconstruye el bosón de Higgs a partir del par de
+\emph{jets} $b$.
+
+\subsection{Cumplimiento de los requisitos}
+
+Se extrae una submuestra aleatoria de \textbf{1.000.000 de filas}, dentro del rango de 200.000 a
+1.000.000 exigido. Respecto de la dimensionalidad, el conjunto aporta 28 columnas y su uso fue
+autorizado expresamente por el profesor dado el volumen de observaciones disponible.
+Adicionalmente, la ingeniería de variables de la Fase~B eleva el conjunto a \textbf{51
+características}, con lo que el mínimo de 40 columnas queda satisfecho.
+
+\section{Fase A: Carga Masiva, Particiones y Análisis Exploratorio}
 
 \subsection{Gestión de memoria}
 
@@ -86,152 +135,225 @@ ocurriendo en el mismo proceso, el desenlace habitual es la terminación de la s
 agotamiento de memoria. La estrategia adoptada combina cuatro medidas: lectura por bloques de
 1.000.000 de filas mediante \texttt{chunksize}, casteo explícito a \texttt{float32} ---la mitad de
 memoria por valor---, muestreo aleatorio del 9,09\,\% de \emph{cada} bloque y liberación explícita
-mediante \texttt{del} y \texttt{gc.collect()}.
+de cada bloque mediante \texttt{del} y \texttt{gc.collect()}.
 
-El muestreo uniforme sobre los 11 bloques no es un detalle: el orden de las filas en HIGGS no es
-aleatorio, puesto que el \emph{benchmark} original reserva las últimas 500.000 observaciones como
-conjunto de prueba. Leer secuencialmente desde el inicio habría producido particiones sesgadas.
+El muestreo uniforme sobre los 11 bloques no es un detalle accesorio: el orden de las filas en
+HIGGS no es aleatorio, puesto que el \emph{benchmark} original reserva las últimas 500.000
+observaciones como conjunto de prueba. Leer secuencialmente desde el inicio, o muestrear solo los
+primeros bloques, habría producido particiones sesgadas y \emph{data drift} efectivo.
 
 El consumo máximo del proceso fue de \textbf{0,94\,GB}, menos del 13\,\% del tamaño del archivo.
-La progresión por etapa ---0,32\,GB al inicio; 0,45 tras la submuestra; 0,67 tras las particiones;
-0,88 tras el \emph{profiling}; 0,94 al cierre--- es gradual y sin saltos abruptos, lo que confirma
-que ninguna etapa materializa el archivo completo. La submuestra se persiste en \texttt{.parquet}
-(62,6\,MB en disco frente a 113\,MB en memoria), formato que además conserva los tipos de dato al
-releer.
+La progresión por etapa ---0,32\,GB al inicio; 0,45 tras construir la submuestra; 0,67 tras generar
+las particiones; 0,88 tras el reporte de \emph{profiling}; 0,94 al cerrar el análisis no
+supervisado--- es gradual y sin saltos abruptos, lo que confirma que ninguna etapa materializa el
+archivo completo. La submuestra se persiste en formato \texttt{.parquet}, que ocupa 62,6\,MB en
+disco frente a 113\,MB en memoria y conserva los tipos de dato al releer, garantía que el formato
+CSV no ofrece.
 
 \subsection{Particiones y ausencia de \emph{data leakage}}
 
-Se emplea una partición estratificada 70/15/15 y el \texttt{StandardScaler} se ajusta
-\textbf{exclusivamente con Train}. La evidencia de que no hubo fuga reside en el contraste entre
-particiones (Tabla~\ref{tab:leakage}): Train presenta media nula y desviación unitaria
-\emph{exactas} por construcción, mientras Validation y Test quedan próximos pero no exactos, al
-haber sido transformados con parámetros ajenos. Si el escalador se hubiera ajustado sobre el
-dataset completo antes de particionar, las tres filas serían exactas; la asimetría observada es
-precisamente la firma de un procedimiento correcto.
+Se emplea una partición estratificada 70/15/15 mediante \texttt{train\_test\_split} con
+\texttt{stratify=y}, y el \texttt{StandardScaler} se ajusta \textbf{exclusivamente con el conjunto
+de entrenamiento}. Validación y prueba se transforman con esos parámetros, sin re-ajuste.
+
+La evidencia de que no hubo fuga de información reside en el contraste entre particiones
+(Tabla~\ref{tab:leakage}). Train presenta media nula y desviación unitaria \emph{exactas} por
+construcción, puesto que esa es la definición de la transformación; validación y prueba quedan
+próximas pero no exactas, al haber sido transformadas con parámetros ajenos. Si el escalador se
+hubiera ajustado sobre el conjunto completo antes de particionar, las tres filas serían exactas
+por igual. La asimetría observada es precisamente la firma de un procedimiento correcto, y un
+resultado exacto en las tres habría constituido el indicio de fuga.
 
 \begin{table}[H]
 \centering
-\small
 \caption{Verificación del escalado sobre las tres particiones. La proporción de señal es de
-52,954\,\% en las tres, efecto directo de \texttt{stratify=y}.}
+52,954\,\% en las tres, efecto directo de la estratificación.}
 \label{tab:leakage}
 \begin{tabular}{lrrrr}
 \toprule
 \textbf{Partición} & \textbf{Filas} & $|\text{media}|$ \textbf{máx.} & \textbf{std mín.} & \textbf{std máx.} \\
 \midrule
 Train      & 699.999 & $4{,}21\times10^{-7}$ & 1,000000 & 1,000000 \\
-Validation & 150.000 & $7{,}45\times10^{-3}$ & 0,992832 & 1,015338 \\
-Test       & 150.000 & $7{,}16\times10^{-3}$ & 0,989940 & 1,005240 \\
+Validación & 150.000 & $7{,}45\times10^{-3}$ & 0,992832 & 1,015338 \\
+Prueba     & 150.000 & $7{,}16\times10^{-3}$ & 0,989940 & 1,005240 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-La auditoría comparativa se realizó con \texttt{ydata-profiling}, empleando
-\texttt{ProfileReport(minimal=True)} sobre 10.000 filas por partición y la función
-\texttt{compare([train, val, test])}. Los histogramas de las 28 variables se solapan en las tres
-particiones, confirmando la ausencia de \emph{data drift}.
+\subsection{Auditoría comparativa de particiones}
+
+La auditoría exigida por el enunciado se realizó con \texttt{ydata-profiling}, empleando
+\texttt{ProfileReport} con el parámetro \texttt{minimal=True} ---que desactiva el cálculo de
+correlaciones costosas e interacciones--- sobre una submuestra de 10.000 filas por partición, y la
+función \texttt{compare([train, val, test])}. El reporte resultante, de 3,1\,MB generado en 11
+segundos, superpone las distribuciones de las 28 variables en las tres particiones: las curvas se
+solapan en todos los casos, confirmando la ausencia de \emph{data drift}.
 
 \subsection{Análisis no supervisado}
 
-Sobre una submuestra del 10\,\% (100.000 filas) se aplicaron PCA, t-SNE~\cite{tsne} y K-Means. Los
-tres métodos convergen en un mismo diagnóstico, resumido en la Figura~\ref{fig:eda}.
+Sobre una submuestra del 10\,\% (100.000 filas) se aplicaron PCA, t-SNE \citep{tsne} y K-Means.
+El análisis responde una pregunta previa al entrenamiento: ¿conforman las dos clases grupos
+separables en el espacio de las variables? Si un método que no accede a las etiquetas recuperara
+la separación entre señal y fondo, el problema admitiría soluciones considerablemente más simples
+que una red profunda.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.46\textwidth}
+\begin{subfigure}{0.48\textwidth}
   \includegraphics[width=\linewidth]{\figdir/pca.png}
-  \caption{PCA: 20 de 28 componentes para el 90\,\% de la varianza.}
+  \caption{PCA}
 \end{subfigure}\hfill
-\begin{subfigure}{0.46\textwidth}
+\begin{subfigure}{0.48\textwidth}
   \includegraphics[width=\linewidth]{\figdir/kmeans.png}
-  \caption{K-Means: silueta 0,186 con $k=2$; ARI 0,0085.}
+  \caption{K-Means}
 \end{subfigure}
-\caption{Análisis no supervisado sobre 100.000 observaciones.}
+\caption{Análisis no supervisado sobre 100.000 observaciones. Se requieren 20 de 28 componentes
+para explicar el 90\,\% de la varianza, y el agrupamiento no reproduce la etiqueta física.}
 \label{fig:eda}
 \end{figure}
 
-El PCA requiere \textbf{20 de 28 componentes} para explicar el 90\,\% de la varianza, y las dos
-primeras capturan apenas el 21,1\,\%: no existe un subespacio lineal dominante. El índice de
-silueta~\cite{rousseeuw} es bajo para todo $k$ evaluado (0,186 con $k=2$; por debajo de 0,045 para
-$k=3,4,5$), y el índice de Rand ajustado~\cite{hubert} frente a la etiqueta real es de
-\textbf{0,0085}, prácticamente nulo. El agrupamiento por distancia euclidiana no guarda relación
-con la división física señal/fondo.
+Los tres métodos convergen en un mismo diagnóstico. El PCA requiere \textbf{20 de 28 componentes}
+para explicar el 90\,\% de la varianza, y las dos primeras capturan apenas el 21,1\,\%: no existe
+un subespacio lineal dominante. El índice de silueta \citep{rousseeuw} es bajo para todo $k$
+evaluado ---0,186 con $k=2$ y por debajo de 0,045 para $k=3,4,5$---, y el índice de Rand ajustado
+\citep{hubert} frente a la etiqueta real es de \textbf{0,0085}, prácticamente nulo. El
+agrupamiento por distancia euclidiana no guarda relación alguna con la división física entre señal
+y fondo: la estructura geométrica dominante está determinada por la cinemática general de las
+colisiones y no por el proceso que las originó.
 
-Lejos de ser un resultado negativo, esto constituye la justificación cuantitativa del diseño
-posterior: el problema no es separable por métodos lineales ni por agrupamiento, de modo que se
-requiere un modelo capaz de representar interacciones no lineales. El análisis documentó además
-correlaciones de hasta 0,896 entre masas invariantes, lo que obliga a regularizar de forma
-explícita.
+Lejos de constituir un resultado negativo, este diagnóstico es la justificación cuantitativa del
+diseño posterior. El problema no es separable por métodos lineales ni por agrupamiento, de modo
+que se requiere un modelo capaz de representar interacciones no lineales. El análisis documentó
+además correlaciones de hasta 0,896 entre masas invariantes, colinealidad de origen estructural
+que obliga a regularizar de forma explícita.
 
-\section{Fase B: ingeniería de variables, búsqueda e hiperparámetros}
+\section{Fase B: Ingeniería de Variables y Búsqueda de Hiperparámetros}
 
 \subsection{Construcción de 23 variables derivadas}
 
-Las 7 variables de alto nivel del dataset son, en rigor, \emph{feature engineering} realizado por
-expertos, lo que acredita que sobre estos datos la ingeniería de variables funciona. El trabajo
-prolonga esa línea en una dirección que el dataset no cubre: las \textbf{relaciones angulares}
-entre partículas. Las masas invariantes combinan energías, pero ninguna variable del archivo
-expresa el grado de separación entre dos \emph{jets}, magnitud con significado físico, ya que la
-topología del evento depende de la masa de la partícula que lo originó.
+Las 7 variables de alto nivel del conjunto original son, en rigor, ingeniería de variables
+realizada por expertos del dominio, lo que acredita que sobre estos datos el procedimiento
+funciona. El trabajo prolonga esa línea en una dirección que el conjunto no cubre: las
+\textbf{relaciones angulares} entre partículas. Las masas invariantes combinan energías, pero
+ninguna variable del archivo expresa el grado de separación entre dos \emph{jets}, magnitud con
+significado físico, dado que la topología del evento ---si los productos emergen en direcciones
+próximas u opuestas--- depende de la masa de la partícula que los originó.
 
-Se construyen 23 variables en cinco familias: separación angular
-($\Delta R = \sqrt{\Delta\eta^2 + \Delta\phi^2}$, la métrica estándar en física de altas
-energías~\cite{antikt}), relación leptón--resto del evento, balance energético, etiquetado de
-sabor pesado~\cite{cms2018} y transformaciones de masa (logaritmos y cocientes).
+La medida estándar de separación entre objetos en física de altas energías, definida en el plano
+de rapidez y ángulo azimutal \citep{antikt}, es
 
-\paragraph{Periodicidad de $\phi$.} El ángulo azimutal es periódico: dos objetos en extremos
-opuestos del rango son en realidad adyacentes, por lo que la diferencia debe envolverse. En este
-dataset $\phi$ \textbf{no está en radianes}, sino reescalado; el período se determinó
-empíricamente en \textbf{3,4879} (rango $\pm1{,}7439$) frente a los 6,2832 que correspondería a
-$2\pi$. Asumir radianes habría falseado las siete variables angulares.
+\begin{equation}
+\Delta R_{ij} = \sqrt{(\eta_i - \eta_j)^2 + (\Delta\phi_{ij})^2}
+\label{eq:deltar}
+\end{equation}
 
-\paragraph{Resultado.} De las 15 variables más correlacionadas con la etiqueta, \textbf{9 son
-construidas en esta fase}. El hallazgo más informativo es que
-\texttt{m\_wbb\_over\_m\_wwbb} (0,1391) supera a \texttt{m\_wwbb} (0,1243), que es una de las dos
-masas con las que se construye: la información reside en la \emph{proporción} entre sistemas
-físicos y no en su magnitud absoluta, que depende de la energía total del evento. El mismo efecto
-se observa en \texttt{m\_bb\_over\_m\_wbb} (0,1198) frente a \texttt{m\_wbb} (0,0663).
+Se construyeron \textbf{23 variables} agrupadas en cinco familias: separación angular (seis
+\texttt{dR\_*} más \texttt{deta\_j1j2} y \texttt{dphi\_j1j2}), relación leptón--resto del evento,
+balance energético (\texttt{ht\_jets}, \texttt{pt\_total} y cocientes), etiquetado de sabor pesado
+\citep{cms2018} mediante \texttt{n\_btags} y \texttt{suma\_btags}, y transformaciones de masa
+---logaritmos, que comprimen las colas largas, y cocientes, que son adimensionales---. La
+construcción completa sobre 1.000.000 de filas tomó 0,6 segundos y ninguna variable presenta
+valores \texttt{NaN} ni infinitos.
+
+\subsection{Tratamiento de la periodicidad de \texorpdfstring{$\phi$}{phi}}
+
+El ángulo azimutal es periódico: dos objetos situados en extremos opuestos del rango son en
+realidad adyacentes, por lo que una resta directa asignaría separación máxima a una configuración
+de separación mínima. La diferencia debe envolverse al intervalo correspondiente a medio período:
+
+\begin{equation}
+\Delta\phi_{ij} = (\phi_i - \phi_j) - P \cdot \text{round}\!\left(\frac{\phi_i - \phi_j}{P}\right)
+\label{eq:dphi}
+\end{equation}
+
+A ello se añade una particularidad del conjunto: $\phi$ \textbf{no está expresado en radianes},
+sino reescalado. El período se determinó empíricamente en $P = 3{,}4879$ (rango observado
+$\pm1{,}7439$), frente a los $2\pi = 6{,}2832$ que correspondería a radianes. Asumir radianes
+habría falseado las siete variables angulares construidas.
+
+\subsection{Variables más informativas}
+
+De las 15 variables más correlacionadas con la etiqueta, \textbf{9 son construidas en esta fase}.
+El hallazgo más informativo es que \texttt{m\_wbb\_over\_m\_wwbb} (0,1391) supera a
+\texttt{m\_wwbb} (0,1243), que es una de las dos masas con las que se construye: la información
+reside en la \emph{proporción} entre sistemas físicos y no en su magnitud absoluta, que depende de
+la energía total del evento y por ello introduce variabilidad ajena a la clase. El mismo efecto se
+observa en \texttt{m\_bb\_over\_m\_wbb} (0,1198) frente a \texttt{m\_wbb} (0,0663).
+
+Cabe advertir que estos coeficientes miden correlación \emph{lineal}, mientras el análisis no
+supervisado estableció que la información discriminante reside en las interacciones no lineales.
+El coeficiente sirve para verificar que la construcción produjo variables con señal, no para
+descartar las demás.
 
 \subsection{Búsqueda progresiva con Optuna}
 
-Conforme a la exigencia de no buscar con el 100\,\% de los datos, la búsqueda se ejecutó sobre el
-\textbf{20\,\%} (139.999 filas de Train y 30.000 de Validation), con 30 intentos en
-\textbf{16,9 minutos}. El \texttt{MedianPruner} interrumpió \textbf{7} configuraciones poco
-prometedoras y 23 se completaron. El muestreador TPE de Optuna~\cite{optuna} concentra los
-intentos en las regiones que dieron buenos resultados, en lugar de recorrer una grilla.
+Conforme a la exigencia de no realizar la búsqueda con el 100\,\% de los datos, esta se ejecutó
+sobre el \textbf{20\,\%} ---139.999 filas de entrenamiento y 30.000 de validación--- con 30
+intentos en \textbf{16,9 minutos}. El muestreador TPE de Optuna \citep{optuna} modela qué regiones
+del espacio produjeron buenos resultados y concentra allí los intentos siguientes, mientras el
+\texttt{MedianPruner} interrumpe un intento a mitad de entrenamiento si su ROC-AUC se sitúa por
+debajo de la mediana de los previos en la misma época. De los 30 intentos, \textbf{23 se
+completaron y 7 fueron podados}.
 
-Buscar sobre el 100\,\% habría demandado algo más de 80 minutos para los mismos 30 intentos: el
-costo medido por época sobre 700.000 filas va de 1,52\,s con la arquitectura menor a 10,16\,s con
-la mayor, un factor cercano a 5 respecto del subconjunto.
+Buscar sobre el 100\,\% de los datos habría demandado algo más de 80 minutos para los mismos 30
+intentos: el costo medido por época sobre 700.000 filas va de 1,52\,s con la arquitectura menor a
+10,16\,s con la mayor, un factor cercano a 5 respecto del subconjunto. El \emph{pruning} no fue un
+refinamiento sino una condición de viabilidad en un entorno sin GPU.
 
-\paragraph{Importancia de los hiperparámetros.} El análisis atribuyó el \textbf{88,5\,\%} de la
-variación al \emph{dropout}, frente al \textbf{0,9\,\%} de la arquitectura. Leído aisladamente
-sugeriría que la arquitectura es irrelevante; sin embargo, los diez mejores intentos emplean
-\emph{todos} la arquitectura \texttt{512-256-128}. Ambos hechos son compatibles: la regularización
-decide cuán bien se aprovecha una arquitectura, mientras la arquitectura impone el techo
-alcanzable.
+El análisis de importancia atribuyó el \textbf{88,5\,\%} de la variación del objetivo al
+\emph{dropout}, frente al \textbf{0,9\,\%} de la arquitectura. Leído aisladamente, ese resultado
+sugeriría que la arquitectura es irrelevante; sin embargo, los diez mejores intentos del estudio
+emplean \emph{todos} la arquitectura \texttt{512-256-128}, sin excepción. Ambos hechos son
+compatibles: la importancia mide la varianza explicada a lo largo de todo el espacio ---y un
+\emph{dropout} mal elegido degrada cualquier arquitectura, produciendo oscilaciones amplias---,
+mientras el ranking muestra que alcanzar la zona superior exige la arquitectura mayor. La
+regularización decide cuán bien se aprovecha una arquitectura; la arquitectura impone el techo.
+
+\subsection{Arquitectura y motor de entrenamiento}
+
+La red es una FFNN cuyos bloques ocultos se componen de \texttt{Linear} $\rightarrow$
+\texttt{BatchNorm1d} \citep{batchnorm} $\rightarrow$ \texttt{ReLU} $\rightarrow$ \texttt{Dropout}
+\citep{dropout}, con una única neurona lineal de salida que entrega \emph{logits}. Las capas
+ocultas emplean inicialización He \citep{he2015}, que compensa con $\sigma = \sqrt{2/\text{fan\_in}}$
+la reducción de varianza que introduce ReLU, y la capa de salida inicialización Xavier
+\citep{glorot}, dado que no está seguida de una no linealidad. Las capas lineales que preceden a
+\texttt{BatchNorm1d} se definen con \texttt{bias=False}, puesto que la normalización resta la
+media del lote e incorpora su propio parámetro de desplazamiento.
+
+El optimizador es AdamW \citep{adamw}, que desacopla la regularización $L_2$ del paso adaptativo
+---pertinente dada la colinealidad documentada---, y la función de pérdida es
+\texttt{BCEWithLogitsLoss} con
+
+\begin{equation}
+\texttt{pos\_weight} = \frac{n_{\text{neg}}}{n_{\text{pos}}} = 0{,}8884
+\label{eq:posweight}
+\end{equation}
+
+El entrenamiento incorpora Early Stopping con restauración de los mejores pesos ---no los de la
+última época--- y persistencia del \emph{checkpoint} en Google Drive cada vez que la métrica de
+validación mejora, de modo que una interrupción no obligue a reiniciar.
 
 \subsection{Modelos base con muestreo Bootstrap}
 
-La arquitectura es una FFNN con bloques \texttt{Linear $\to$ BatchNorm1d~\cite{batchnorm} $\to$
-ReLU $\to$ Dropout~\cite{dropout}}, inicialización He~\cite{he2015} en las capas ocultas y
-Xavier~\cite{glorot} en la salida lineal, optimizada con AdamW~\cite{adamw} y
-\texttt{BCEWithLogitsLoss} con \texttt{pos\_weight} $=0{,}8884$. Se emplea Early Stopping con
-restauración de los mejores pesos y persistencia del \emph{checkpoint} en Google Drive.
+Cada modelo se entrena sobre una muestra Bootstrap \citep{efron} distinta, extraída con reemplazo,
+que contiene alrededor del 63,2\,\% de las filas originales distintas y deja fuera el 36,8\,\%
+restante (\emph{Out-Of-Bag}), conforme al esquema de Bagging \citep{breiman}. El efecto buscado es
+que cada modelo observe una distribución ligeramente distinta y, en consecuencia, cometa errores
+distintos.
 
-Cada modelo se entrena sobre una muestra Bootstrap~\cite{efron} distinta ---63,2\,\% de filas
-únicas, 36,8\,\% \emph{Out-Of-Bag}--- conforme al esquema de Bagging~\cite{breiman}. A diferencia
-del esquema base, que replica una única configuración, aquí \textbf{cada modelo recibe una de las
-tres mejores configuraciones con arquitecturas distintas} del estudio. La razón es que modelos de
-configuración idéntica aprenden funciones similares y cometen errores correlacionados, lo que
-dejaría a la meta-red sin nada que ponderar.
+A diferencia del esquema base, que replica una única configuración en los $M$ modelos, aquí
+\textbf{cada modelo recibe una de las tres mejores configuraciones con arquitecturas distintas}
+del estudio de Optuna. La razón es que modelos de configuración idéntica aprenden funciones muy
+similares y sus errores quedan fuertemente correlacionados, lo que dejaría a la meta-red de la
+Fase~C sin nada sustantivo que ponderar. La diversidad proviene así de tres fuentes ---la muestra
+Bootstrap, la semilla de inicialización y la configuración--- en lugar de una sola.
 
 \begin{table}[H]
 \centering
-\small
 \caption{Modelos base. El orden de mérito se conserva al pasar del 20\,\% al 100\,\% de los datos,
 lo que valida empíricamente el esquema de búsqueda progresiva.}
 \label{tab:base}
+\small
 \begin{tabular}{llrrrrr}
 \toprule
 \textbf{Modelo} & \textbf{Arquitectura} & \textbf{Dropout} & \textbf{AUC (20\,\%)} & \textbf{AUC (100\,\%)} & \textbf{Épocas} & \textbf{Min.} \\
@@ -243,45 +365,75 @@ base\_3 & 128-64      & 0,440 & 0,82243 & 0,83332 & 43 & 1,8 \\
 \end{tabular}
 \end{table}
 
-Los tres modelos activaron Early Stopping entre las épocas 41 y 45, sin agotar el presupuesto de
-60. La brecha entre pérdida de entrenamiento y validación en la mejor época ---0,0345; 0,0214 y
-0,0107 respectivamente--- es moderada y creciente con la capacidad, comportamiento esperado y
-contenido por la regularización (Figura~\ref{fig:curvas}).
+Las tres muestras Bootstrap arrojaron una cobertura de 63,2\,\% de filas únicas, coincidente con
+el valor teórico. Los tres modelos activaron Early Stopping entre las épocas 41 y 45, sin agotar
+el presupuesto de 60, y la pérdida de validación descendió de forma monótona hasta estabilizarse,
+sin el repunte que caracteriza al sobreajuste (Figura~\ref{fig:curvas}). La brecha entre pérdida
+de entrenamiento y validación en la mejor época ---0,0345; 0,0214 y 0,0107 respectivamente--- es
+moderada y creciente con la capacidad de la red, comportamiento esperado y contenido por la
+regularización.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.76\textwidth]{\figdir/curvas_modelos_base.png}
-\caption{Curvas de pérdida (Train \emph{vs.} Validation) y ROC-AUC de validación por época. La
-línea vertical marca la época seleccionada por Early Stopping.}
+\includegraphics[width=0.95\textwidth]{\figdir/curvas_modelos_base.png}
+\caption{Curvas de pérdida (entrenamiento \emph{vs.} validación) y ROC-AUC de validación por
+época. La línea vertical marca la época seleccionada por Early Stopping.}
 \label{fig:curvas}
 \end{figure}
 
-\section{Fase C: Stacking Ensemble y evaluación final}
+\section{Fase C: Stacking Ensemble}
 
-\subsection{La meta-red}
+\subsection{Arquitectura de la meta-red}
 
-La clase \texttt{StackingEnsemble} congela los tres modelos base, concatena sus \emph{logits} y
-los combina mediante una capa lineal entrenable~\cite{wolpert}. Los modelos base permanecen
-siempre en modo evaluación: de lo contrario su Dropout se activaría y las estadísticas de
-BatchNorm seguirían actualizándose, alterando las predicciones que la meta-red intenta aprender a
-combinar.
+El procedimiento más simple para unir varios modelos consiste en promediar sus predicciones con
+pesos iguales, lo que supone que todos son igualmente confiables. El \emph{Stacking}
+\citep{wolpert} entrena en cambio un segundo modelo ---el meta-aprendiz--- cuya única función es
+determinar cómo ponderarlos, infiriendo de los datos que un modelo merece más peso que otro.
 
-La meta-red se entrena sobre el conjunto de \textbf{Validación} ---nunca sobre Train, donde los
-modelos base ya memorizaron parte de las filas--- dividido 70/30 para que su propio Early Stopping
-no use los mismos datos que ajusta. Se introdujo una desviación deliberada respecto del código
-base: la meta-capa se inicializa en el \emph{promedio simple} (peso $1/M$, sesgo nulo) en lugar de
-Xavier, dado que con solo tres entradas Xavier puede entregar pesos negativos y hacer que el
-ensamble parta invirtiendo el ordenamiento de las predicciones.
+La implementación congela los $M$ modelos base, concatena sus \emph{logits} y los combina mediante
+una capa lineal entrenable:
 
-\subsection{Resultados sobre el conjunto de prueba}
+\begin{equation}
+\hat{y} = \mathbf{w}^{\top} \big[ f_1(\mathbf{x}),\, f_2(\mathbf{x}),\, \ldots,\, f_M(\mathbf{x}) \big] + b
+\label{eq:stacking}
+\end{equation}
 
-El conjunto de Test se abrió una sola vez, al final. No intervino en el entrenamiento de los
-modelos base, ni en su Early Stopping, ni en la búsqueda de hiperparámetros, ni en el ajuste de la
-meta-red.
+Los modelos base permanecen siempre en modo evaluación, incluso mientras el ensamble se entrena.
+De lo contrario su \emph{dropout} se activaría y las estadísticas de \texttt{BatchNorm1d}
+continuarían actualizándose, alterando precisamente las predicciones que la meta-red intenta
+aprender a combinar.
+
+\subsection{Conjunto de ajuste de la meta-red}
+
+Si el meta-aprendiz observara las predicciones de los modelos base sobre los datos con que esos
+modelos fueron entrenados, registraría un desempeño artificialmente elevado ---cada modelo ha
+memorizado parcialmente esas observaciones--- y aprendería a asignarles una confianza superior a
+la que les corresponde. Por ello la meta-red se entrena sobre el conjunto de \textbf{validación},
+que ningún modelo base utilizó para ajustar sus pesos, dividido 70/30 para que su propio criterio
+de Early Stopping no se evalúe sobre las mismas observaciones que ajusta. El conjunto de prueba
+permanece sin utilizar.
+
+\subsection{Inicialización de la meta-capa}
+
+Se introdujo una desviación deliberada respecto del código base, que inicializa la meta-capa con
+Xavier. Con solo $M=3$ entradas, esa inicialización puede entregar pesos negativos, en cuyo caso
+el ensamble parte invirtiendo el ordenamiento de las predicciones ---ROC-AUC por debajo de 0,5---
+y debe recorrer el espacio de parámetros hasta alcanzar el signo correcto antes de poder mejorar.
+El comportamiento se verificó experimentalmente durante las pruebas. La meta-capa se inicializa
+por tanto en el promedio simple, con peso $1/M$ y sesgo nulo, de modo que el ensamble parte
+exactamente en la línea base que debe superar.
+
+\section{Análisis de Resultados}
+
+\subsection{Desempeño sobre el conjunto de prueba}
+
+El conjunto de prueba se abrió una sola vez, al final del trabajo. No intervino en el
+entrenamiento de los modelos base, ni en su Early Stopping, ni en la búsqueda de hiperparámetros,
+ni en el ajuste de la meta-red, de modo que las cifras de la Tabla~\ref{tab:test} constituyen una
+estimación insesgada del desempeño.
 
 \begin{table}[H]
 \centering
-\small
 \caption{Desempeño sobre los 150.000 eventos del conjunto de prueba.}
 \label{tab:test}
 \begin{tabular}{lrrrr}
@@ -300,157 +452,235 @@ Promedio simple             & 0,85282 & 0,86469 & 0,78046 & 76,89\,\% \\
 El Stacking obtiene el mejor valor en las cuatro métricas, superando al promedio simple en 0,00290
 de ROC-AUC y al mejor modelo individual en 0,00256.
 
-\paragraph{El promedio simple empeoró el resultado.} El dato más relevante de la
-Tabla~\ref{tab:test} no es la ganancia del ensamble sino el fracaso de la alternativa ingenua: el
-promedio simple quedó \emph{por debajo} del mejor modelo individual (0,85282 frente a 0,85316).
-Combinar los tres modelos dándoles el mismo voto produjo un predictor peor que quedarse solo con
-el mejor. La causa es identificable: \texttt{base\_3} está dos centésimas por debajo de
-\texttt{base\_1} y un promedio sin pesos le concede un tercio de la decisión. En un ensamble cuyos
-miembros no son equivalentes, aprender los pesos no es un refinamiento opcional, sino lo que
-separa mejorar de empeorar.
+El dato más relevante de la tabla, sin embargo, no es esa ganancia sino el fracaso de la
+alternativa ingenua: \textbf{el promedio simple quedó por debajo del mejor modelo individual}
+---0,85282 frente a 0,85316---. Combinar los tres modelos otorgándoles el mismo voto produjo un
+predictor peor que quedarse únicamente con el mejor de ellos. La causa es identificable:
+\texttt{base\_3} se sitúa dos centésimas de ROC-AUC por debajo de \texttt{base\_1} y un promedio
+sin pesos le concede un tercio de la decisión, de modo que lo que ese tercio resta supera lo que
+la diversidad de los otros dos aporta.
 
-\paragraph{Los pesos aprendidos ordenaron a los modelos por competencia.} La meta-red asignó pesos
-de $+0{,}6401$, $+0{,}4547$ y $-0{,}0493$, reproduciendo \emph{exactamente} el orden de los AUC
-individuales (0,85341; 0,84993; 0,83332) sin que esa información se le proporcionara: solo observó
-predicciones. El signo negativo de \texttt{base\_3} no es un defecto, sino indicación de que la
-meta-red lo emplea como \textbf{corrector} y no como votante, relación que un promedio simple es
-incapaz de expresar por tener pesos positivos e iguales por definición. Todo ello con 4 parámetros
-entrenables frente a 262.019 congelados: el 0,0015\,\% del total.
+La ganancia absoluta del ensamble es modesta ---dos milésimas y media de ROC-AUC---, pero su
+contribución no se mide contra el mejor modelo sino contra la alternativa que un ensamble ingenuo
+habría producido. En un conjunto cuyos miembros no son equivalentes, aprender los pesos no
+constituye un refinamiento opcional: es lo que separa mejorar de empeorar.
+
+\subsection{Los pesos aprendidos}
+
+\begin{table}[H]
+\centering
+\caption{Pesos de la meta-capa contrastados con el desempeño individual en validación.}
+\label{tab:pesos}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Modelo} & \textbf{Peso aprendido} & \textbf{Peso relativo} & \textbf{ROC-AUC individual} \\
+\midrule
+base\_1 & $+0{,}6401$ & 55,9\,\% & 0,85341 \\
+base\_2 & $+0{,}4547$ & 39,7\,\% & 0,84993 \\
+base\_3 & $-0{,}0493$ & 4,3\,\%  & 0,83332 \\
+sesgo   & $-0{,}0469$ & ---      & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La meta-red ordenó a los tres modelos \textbf{exactamente según su competencia individual} sin que
+esa información se le proporcionara: solo observó sus predicciones sobre el conjunto de
+validación. El modelo más preciso recibió más del doble del peso que el intermedio.
+
+El signo negativo de \texttt{base\_3} merece atención, porque no constituye un defecto. Un peso
+negativo indica que la meta-red no lo emplea como un voto adicional sino como \textbf{corrector}:
+resta parte de su predicción a la combinación de los otros dos. Es el comportamiento esperable de
+un modelo que subajusta ---su \emph{dropout} de 0,440 sobre la red más pequeña se lo impidió--- y
+que, por lo mismo, sistematiza sus errores de un modo que resulta informativo restar. Un promedio
+simple es incapaz de expresar esa relación, dado que sus pesos son positivos e iguales por
+definición.
+
+Conviene registrar lo que la meta-red no necesitó: 4 parámetros entrenables frente a 262.019
+congelados de los modelos base, esto es, el 0,0015\,\% del total, ajustados en 11 segundos y 22
+épocas. El Stacking no vuelve a aprender el problema, sino únicamente cómo combinar lo ya
+aprendido.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.46\textwidth}
+\begin{subfigure}{0.48\textwidth}
   \includegraphics[width=\linewidth]{\figdir/meta_stacking.png}
   \caption{Pesos aprendidos por la meta-red.}
 \end{subfigure}\hfill
-\begin{subfigure}{0.46\textwidth}
+\begin{subfigure}{0.48\textwidth}
   \includegraphics[width=\linewidth]{\figdir/matriz_confusion.png}
-  \caption{Matriz de confusión del Stacking sobre Test.}
+  \caption{Matriz de confusión del Stacking.}
 \end{subfigure}
-\caption{Combinación aprendida y desempeño final.}
+\caption{Combinación aprendida y desempeño final sobre el conjunto de prueba.}
 \label{fig:final}
 \end{figure}
 
 \subsection{Lectura en el contexto del experimento}
 
-Con el umbral por defecto de 0,5, de las 79.431 colisiones de señal presentes en Test el modelo
-detectó \textbf{61.235 (77,09\,\%)} y perdió 18.196; de las 70.569 de fondo descartó correctamente
-54.454 (77,16\,\%) y dejó pasar 16.115. De cada 100 eventos marcados como señal, \textbf{79,2 lo
-son efectivamente}.
+Con el umbral por defecto de 0,5, de las 79.431 colisiones de señal presentes en el conjunto de
+prueba el modelo detectó \textbf{61.235 (77,09\,\%)} y perdió 18.196; de las 70.569 de fondo,
+descartó correctamente 54.454 (77,16\,\%) y dejó pasar 16.115, que contaminan la muestra
+seleccionada. De cada 100 eventos marcados como señal, \textbf{79,2 lo son efectivamente}.
 
-Ambos errores tienen costos distintos: un falso negativo es una colisión de Higgs descartada
----tiempo de acelerador desperdiciado---, mientras un falso positivo contamina la muestra y diluye
-la significancia estadística del análisis posterior. Desplazar el umbral a 0,3565 eleva el
-\emph{recall} al 87,2\,\% a cambio de 6,3 puntos de precisión. En un análisis real esa elección no
-se resuelve maximizando F1, que es agnóstica al dominio, sino según la significancia buscada y el
-presupuesto de cómputo disponible.
+Ambos errores tienen costos distintos y no intercambiables. Un falso negativo es una colisión de
+Higgs descartada: tiempo de acelerador invertido en un evento que luego se ignora. Un falso
+positivo contamina la muestra y diluye la significancia estadística del análisis posterior. La
+simetría casi perfecta del resultado no es una propiedad deseable en sí misma, sino la
+consecuencia de haber fijado el umbral en 0,5 sin un criterio físico.
 
-\section{Desafíos de hardware, tiempo y memoria}
+El análisis de umbrales muestra el margen disponible: desplazar el corte a 0,3565 eleva el
+\emph{recall} al 87,2\,\% a cambio de 6,3 puntos de precisión, mientras el valor que iguala
+precisión y exhaustividad se sitúa en 0,4826. En un análisis real esa elección no se resuelve
+maximizando F1, métrica agnóstica al dominio, sino en función de la significancia estadística
+buscada y del presupuesto de cómputo disponible para procesar los eventos seleccionados.
 
-El trabajo se ejecutó \textbf{íntegramente en CPU} (PyTorch 2.15.0+cpu, 8 hilos), sin GPU. Esa
-restricción determinó el dimensionamiento de la búsqueda. El \emph{pruning} de Optuna no fue un
-refinamiento sino una condición de viabilidad: sin él, el presupuesto no habría alcanzado para
-explorar 30 configuraciones.
+\subsection{Desafíos de hardware, tiempo y memoria}
 
-El tiempo total acumulado de entrenamiento fue de aproximadamente \textbf{32 minutos}
----16,9 de búsqueda, 14,6 de los tres modelos base y 11 segundos de la meta-red---, holgadamente
-dentro del presupuesto de 12 a 24 horas. Los picos de memoria por fase fueron de 0,94\,GB (A),
-1,35\,GB (B) y 0,88\,GB (C), todos muy por debajo de los $\sim$12\,GB del nivel gratuito de Google
+El trabajo se ejecutó \textbf{íntegramente en CPU} (PyTorch 2.15.0+cpu, 8 hilos), sin GPU
+disponible, y esa restricción condicionó todas las decisiones de dimensionamiento. El tiempo total
+acumulado de entrenamiento fue de aproximadamente \textbf{32 minutos} ---16,9 de búsqueda, 14,6 de
+los tres modelos base y 11 segundos de la meta-red---, holgadamente dentro del presupuesto de 12 a
+24 horas que fija el enunciado, holgura atribuible en buena medida al esquema de búsqueda
+progresiva.
+
+Los picos de memoria por fase fueron de 0,94\,GB en la Fase~A, 1,35\,GB en la Fase~B ---alcanzado
+tras la búsqueda, que mantiene en memoria los tensores de entrenamiento y los del subconjunto--- y
+0,88\,GB en la Fase~C, todos muy por debajo de los $\sim$12\,GB del nivel gratuito de Google
 Colab.
 
 Cabe señalar el bajo rendimiento marginal de la capacidad: \texttt{base\_1} necesitó 9,0 minutos
 para superar a \texttt{base\_2} en 0,0035 de ROC-AUC, con 3,5 veces más parámetros y 2,4 veces más
-tiempo.
+tiempo de entrenamiento.
 
-\section{Conclusiones y trabajo futuro}
+\section{Conclusiones y Trabajo Futuro}
 
-El pipeline procesa 1.000.000 de colisiones, construye 23 variables derivadas, selecciona
-hiperparámetros sobre el 20\,\% de los datos, entrena tres redes sobre muestras Bootstrap
-distintas y las combina mediante una meta-red de pesos entrenables, alcanzando un ROC-AUC de
-\textbf{0,85572} y una exactitud del \textbf{77,13\,\%} sobre un conjunto de prueba jamás empleado
-durante el desarrollo. El diagnóstico no supervisado de la Fase~A ---ARI de 0,0085 y 20 de 28
-componentes para el 90\,\% de la varianza--- anticipaba que el problema exigía un modelo capaz de
-interacciones no lineales, y el resultado final lo confirma.
+El pipeline desarrollado procesa 1.000.000 de colisiones, construye 23 variables derivadas,
+selecciona hiperparámetros mediante búsqueda progresiva sobre el 20\,\% de los datos, entrena tres
+redes profundas sobre muestras Bootstrap distintas y las combina mediante una meta-red de pesos
+entrenables, alcanzando un \textbf{ROC-AUC de 0,85572} y una \textbf{exactitud del 77,13\,\%}
+sobre un conjunto de prueba de 150.000 eventos jamás utilizado durante el desarrollo.
+
+El diagnóstico no supervisado de la Fase~A ---ARI de 0,0085 y 20 de 28 componentes necesarias para
+el 90\,\% de la varianza--- anticipaba que el problema exigía un modelo capaz de representar
+interacciones no lineales, y el resultado final lo confirma. La ingeniería de variables contribuyó
+de forma verificable, con 9 de las 15 variables más correlacionadas con la etiqueta construidas en
+la Fase~B.
+
+El aporte metodológico más claro del trabajo se encuentra en el contraste entre el Stacking y el
+promedio simple. Diversificar las configuraciones de los modelos base produjo miembros de
+competencia desigual, situación en la que el promedio sin pesos degradó el resultado respecto del
+mejor modelo individual mientras la combinación aprendida lo superó. Los pesos resultantes
+reprodujeron el orden de competencia de los modelos y asignaron un coeficiente negativo al miembro
+más débil, empleándolo como corrector en lugar de descartarlo.
 
 Las líneas de continuación se desprenden de limitaciones documentadas y no de consideraciones
 generales:
 
-\begin{itemize}[leftmargin=1.2em,itemsep=0.25em]
+\begin{itemize}[leftmargin=1.5em,itemsep=0.3em]
   \item \textbf{Ampliar el espacio de búsqueda.} Los diez mejores intentos emplearon la
-  arquitectura mayor de las cinco disponibles; cuando el óptimo queda en el borde del espacio, es
-  el borde el que impone el techo. Extenderlo hacia redes más profundas y anchas, con más intentos
-  e hiperparámetros adicionales, es la continuación natural, si bien con rendimientos decrecientes
-  dado el bajo rendimiento marginal ya observado.
-  \item \textbf{Contrastar la hipótesis del trabajo original.} Baldi \emph{et al.}~\cite{baldi2014}
-  sostienen que una red profunda puede extraer de las 21 variables de bajo nivel la información
-  que los físicos codificaron en las derivadas. Este trabajo avanzó en la dirección opuesta; la
-  prueba simétrica ---entrenar solo con las variables de bajo nivel--- está pendiente.
-  \item \textbf{Escalar al dataset completo.} Se empleó el 9\,\% de los datos disponibles, y hay
-  evidencia de que el margen no se agota: al pasar del 20\,\% al 100\,\% de Train las tres
-  configuraciones mejoraron entre 0,011 y 0,015 de ROC-AUC sin señales de saturación.
+  arquitectura mayor de las cinco disponibles; cuando el óptimo queda en el borde del espacio
+  explorado, es el borde y no el problema el que impone el techo. Extenderlo hacia redes más
+  profundas y anchas, con más intentos e hiperparámetros adicionales ---programación de la tasa de
+  aprendizaje, funciones de activación alternativas---, es la continuación natural, si bien con
+  rendimientos decrecientes dado el bajo rendimiento marginal ya observado.
+
+  \item \textbf{Contrastar la hipótesis del trabajo original.} \citet{baldi2014} sostienen que una
+  red profunda puede extraer de las 21 variables de bajo nivel la información que los físicos
+  codificaron en las derivadas. Este trabajo avanzó en la dirección opuesta, añadiendo variables
+  construidas; la prueba simétrica ---entrenar el mismo pipeline solo con las variables de bajo
+  nivel--- queda pendiente y es directamente ejecutable con el código desarrollado.
+
+  \item \textbf{Escalar al conjunto completo.} Se empleó el 9\,\% de los datos disponibles, y hay
+  evidencia de que el margen no se agota: al pasar del 20\,\% al 100\,\% del conjunto de
+  entrenamiento, las tres configuraciones mejoraron entre 0,011 y 0,015 de ROC-AUC sin señales de
+  saturación. Requeriría lectura incremental desde disco, al dejar los tensores de caber en
+  memoria.
+
   \item \textbf{Diversificar por regularización.} Siendo el \emph{dropout} el hiperparámetro
-  dominante, diversificar ese eje debería producir miembros con errores aún menos correlacionados
-  que diversificar la arquitectura.
+  dominante, diversificar explícitamente ese eje debería producir miembros con errores aún menos
+  correlacionados que diversificar la arquitectura.
+
   \item \textbf{Calibrar las probabilidades} y \textbf{aprovechar el conjunto Out-Of-Bag}, hoy
-  descartado, para estimar el error de cada modelo base sin consumir el de Validación.
+  descartado, para estimar el error de cada modelo base sin consumir el de validación.
 \end{itemize}
 
+% ============================================================ REFERENCIAS
+\newpage
+\addcontentsline{toc}{section}{Referencias}
 \begin{thebibliography}{99}
-\footnotesize
+\setlength{\itemsep}{0.5em}
 
-\bibitem{baldi2014} P.~Baldi, P.~Sadowski y D.~Whiteson, ``Searching for exotic particles in
-high-energy physics with deep learning'', \emph{Nature Communications}, vol.~5, art.~4308, 2014.
-DOI: 10.1038/ncomms5308.
+\bibitem[Akiba et al., 2019]{optuna}
+Akiba, T., Sano, S., Yanase, T., Ohta, T., \& Koyama, M. (2019). Optuna: A Next-generation
+Hyperparameter Optimization Framework. \emph{Proceedings of the 25th ACM SIGKDD International
+Conference on Knowledge Discovery \& Data Mining}, 2623-2631.
+\url{https://doi.org/10.1145/3292500.3330701}
 
-\bibitem{uci} D.~Whiteson, ``HIGGS'' [dataset], \emph{UCI Machine Learning Repository}, ID~280,
-2014. Disponible en: \url{https://archive.ics.uci.edu/dataset/280/higgs}
+\bibitem[Baldi et al., 2014]{baldi2014}
+Baldi, P., Sadowski, P., \& Whiteson, D. (2014). Searching for exotic particles in high-energy
+physics with deep learning. \emph{Nature Communications}, \emph{5}, 4308.
+\url{https://doi.org/10.1038/ncomms5308}
 
-\bibitem{antikt} M.~Cacciari, G.~P.~Salam y G.~Soyez, ``The anti-$k_t$ jet clustering algorithm'',
-\emph{Journal of High Energy Physics}, vol.~2008, n.º~04, art.~063, 2008.
-DOI: 10.1088/1126-6708/2008/04/063.
+\bibitem[Breiman, 1996]{breiman}
+Breiman, L. (1996). Bagging Predictors. \emph{Machine Learning}, \emph{24}(2), 123-140.
+\url{https://doi.org/10.1007/BF00058655}
 
-\bibitem{cms2018} CMS Collaboration, ``Identification of heavy-flavour jets with the CMS detector
-in pp collisions at 13 TeV'', \emph{Journal of Instrumentation}, vol.~13, art.~P05011, 2018.
-DOI: 10.1088/1748-0221/13/05/P05011.
+\bibitem[Cacciari et al., 2008]{antikt}
+Cacciari, M., Salam, G. P., \& Soyez, G. (2008). The anti-$k_t$ jet clustering algorithm.
+\emph{Journal of High Energy Physics}, \emph{2008}(04), 063.
+\url{https://doi.org/10.1088/1126-6708/2008/04/063}
 
-\bibitem{glorot} X.~Glorot e Y.~Bengio, ``Understanding the difficulty of training deep
-feedforward neural networks'', \emph{AISTATS}, PMLR~9, pp.~249--256, 2010.
+\bibitem[CMS Collaboration, 2018]{cms2018}
+CMS Collaboration. (2018). Identification of heavy-flavour jets with the CMS detector in pp
+collisions at 13 TeV. \emph{Journal of Instrumentation}, \emph{13}, P05011.
+\url{https://doi.org/10.1088/1748-0221/13/05/P05011}
 
-\bibitem{he2015} K.~He, X.~Zhang, S.~Ren y J.~Sun, ``Delving deep into rectifiers: surpassing
-human-level performance on ImageNet classification'', \emph{ICCV}, pp.~1026--1034, 2015.
+\bibitem[Efron, 1979]{efron}
+Efron, B. (1979). Bootstrap Methods: Another Look at the Jackknife. \emph{The Annals of
+Statistics}, \emph{7}(1), 1-26. \url{https://doi.org/10.1214/aos/1176344552}
 
-\bibitem{batchnorm} S.~Ioffe y C.~Szegedy, ``Batch normalization: accelerating deep network
-training by reducing internal covariate shift'', \emph{ICML}, PMLR~37, pp.~448--456, 2015.
+\bibitem[Glorot \& Bengio, 2010]{glorot}
+Glorot, X., \& Bengio, Y. (2010). Understanding the difficulty of training deep feedforward neural
+networks. \emph{Proceedings of AISTATS}, PMLR 9, 249-256.
+\url{https://proceedings.mlr.press/v9/glorot10a.html}
 
-\bibitem{dropout} N.~Srivastava, G.~Hinton, A.~Krizhevsky, I.~Sutskever y R.~Salakhutdinov,
-``Dropout: a simple way to prevent neural networks from overfitting'', \emph{JMLR}, vol.~15,
-pp.~1929--1958, 2014.
+\bibitem[He et al., 2015]{he2015}
+He, K., Zhang, X., Ren, S., \& Sun, J. (2015). Delving Deep into Rectifiers: Surpassing
+Human-Level Performance on ImageNet Classification. \emph{Proceedings of ICCV}, 1026-1034.
+\url{https://arxiv.org/abs/1502.01852}
 
-\bibitem{adamw} I.~Loshchilov y F.~Hutter, ``Decoupled weight decay regularization'',
-\emph{ICLR}, 2019. arXiv:1711.05101.
+\bibitem[Hubert \& Arabie, 1985]{hubert}
+Hubert, L., \& Arabie, P. (1985). Comparing partitions. \emph{Journal of Classification},
+\emph{2}(1), 193-218. \url{https://doi.org/10.1007/BF01908075}
 
-\bibitem{optuna} T.~Akiba, S.~Sano, T.~Yanase, T.~Ohta y M.~Koyama, ``Optuna: a next-generation
-hyperparameter optimization framework'', \emph{KDD}, pp.~2623--2631, 2019.
-DOI: 10.1145/3292500.3330701.
+\bibitem[Ioffe \& Szegedy, 2015]{batchnorm}
+Ioffe, S., \& Szegedy, C. (2015). Batch Normalization: Accelerating Deep Network Training by
+Reducing Internal Covariate Shift. \emph{Proceedings of ICML}, PMLR 37, 448-456.
+\url{https://proceedings.mlr.press/v37/ioffe15.html}
 
-\bibitem{breiman} L.~Breiman, ``Bagging predictors'', \emph{Machine Learning}, vol.~24, n.º~2,
-pp.~123--140, 1996. DOI: 10.1007/BF00058655.
+\bibitem[Loshchilov \& Hutter, 2019]{adamw}
+Loshchilov, I., \& Hutter, F. (2019). Decoupled Weight Decay Regularization. \emph{International
+Conference on Learning Representations (ICLR)}. \url{https://arxiv.org/abs/1711.05101}
 
-\bibitem{efron} B.~Efron, ``Bootstrap methods: another look at the jackknife'', \emph{The Annals
-of Statistics}, vol.~7, n.º~1, pp.~1--26, 1979. DOI: 10.1214/aos/1176344552.
+\bibitem[Rousseeuw, 1987]{rousseeuw}
+Rousseeuw, P. J. (1987). Silhouettes: a graphical aid to the interpretation and validation of
+cluster analysis. \emph{Journal of Computational and Applied Mathematics}, \emph{20}, 53-65.
+\url{https://doi.org/10.1016/0377-0427(87)90125-7}
 
-\bibitem{wolpert} D.~H.~Wolpert, ``Stacked generalization'', \emph{Neural Networks}, vol.~5,
-pp.~241--259, 1992.
+\bibitem[Srivastava et al., 2014]{dropout}
+Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I., \& Salakhutdinov, R. (2014). Dropout: A
+Simple Way to Prevent Neural Networks from Overfitting. \emph{Journal of Machine Learning
+Research}, \emph{15}, 1929-1958. \url{https://jmlr.org/papers/v15/srivastava14a.html}
 
-\bibitem{tsne} L.~van~der~Maaten y G.~Hinton, ``Visualizing data using t-SNE'', \emph{JMLR},
-vol.~9, pp.~2579--2605, 2008.
+\bibitem[van der Maaten \& Hinton, 2008]{tsne}
+van der Maaten, L., \& Hinton, G. (2008). Visualizing Data using t-SNE. \emph{Journal of Machine
+Learning Research}, \emph{9}, 2579-2605. \url{https://jmlr.org/papers/v9/vandermaaten08a.html}
 
-\bibitem{rousseeuw} P.~J.~Rousseeuw, ``Silhouettes: a graphical aid to the interpretation and
-validation of cluster analysis'', \emph{Journal of Computational and Applied Mathematics},
-vol.~20, pp.~53--65, 1987. DOI: 10.1016/0377-0427(87)90125-7.
+\bibitem[Whiteson, 2014]{uci}
+Whiteson, D. (2014). \emph{HIGGS} [Conjunto de datos]. UCI Machine Learning Repository, ID 280.
+\url{https://archive.ics.uci.edu/dataset/280/higgs}
 
-\bibitem{hubert} L.~Hubert y P.~Arabie, ``Comparing partitions'', \emph{Journal of
-Classification}, vol.~2, n.º~1, pp.~193--218, 1985. DOI: 10.1007/BF01908075.
+\bibitem[Wolpert, 1992]{wolpert}
+Wolpert, D. H. (1992). Stacked generalization. \emph{Neural Networks}, \emph{5}, 241-259.
 
 \end{thebibliography}
 
