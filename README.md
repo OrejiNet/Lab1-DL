@@ -40,7 +40,8 @@ Lab1-DL/
 ├── notebooks/
 │   ├── 00_codigo_base_profesor.ipynb   # Notebook de ejemplo, sin outputs (referencia)
 │   ├── 01_EDA_y_Preprocessing.ipynb    # Fase A: carga 1M filas, splits y EDA (ejecutado)
-│   └── 02_Modelos_Base.ipynb           # Fase B: feature engineering, Optuna y modelos base
+│   ├── 02_Modelos_Base.ipynb           # Fase B: feature engineering, Optuna y modelos base
+│   └── 03_Stacking_Ensemble_Final.ipynb # Fase C: meta-red de Stacking y evaluación en Test
 ├── src/
 │   └── lab_base.py        # Mismo código base extraído a módulo reutilizable
 ├── data/                  # Datasets (ignorados por git)
@@ -63,7 +64,10 @@ El enunciado permite entregar uno o varios `.ipynb`. Plan:
    derivadas de la cinemática (51 features en total), búsqueda de hiperparámetros con **Optuna**
    sobre el 20% de los datos con *pruning*, y entrenamiento de **3 modelos base** con muestreo
    Bootstrap al 100%, con checkpoints en Drive.
-3. ⬜ `03_Stacking_Ensemble_Final.ipynb` — meta-red de Stacking, evaluación en test, conclusiones.
+3. ⬜ `03_Stacking_Ensemble_Final.ipynb` — **escrito, falta ejecutarlo** (~2-3 min): reconstruye
+   los modelos base desde sus checkpoints, entrena la **meta-red de Stacking con pesos
+   entrenables** sobre Validación, y evalúa sobre el **conjunto de Test** con matriz de confusión,
+   curvas ROC/PR y análisis de umbral.
 
 ### Cómo ejecutar el notebook 01
 
