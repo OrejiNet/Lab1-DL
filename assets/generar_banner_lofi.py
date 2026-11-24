@@ -19,12 +19,14 @@ DPI = 100
 SEED = 42
 
 # --- paleta -----------------------------------------------------------------
-FONDO_HONDO = "#0b1026"   # indigo casi negro, esquinas
-FONDO_MEDIO = "#141b3d"   # indigo del centro
-AZULES = ["#4c6ef5", "#5e8bd8", "#7aa2f7", "#5ec8e5", "#8ab4e8"]
-LAVANDA = "#9d7cd8"
-AMBAR = "#d9a66c"         # unico acento calido, muy medido
-HUMO = "#c8d3f5"
+FONDO_HONDO = "#0a0e24"   # indigo casi negro, esquinas
+FONDO_MEDIO = "#1a1f4d"   # indigo con algo de violeta en el centro
+
+# Paleta synthwave apagada: el azul sigue mandando, pero acompanado.
+FRIOS = ["#4c6ef5", "#5ec8e5", "#2ac3de", "#73daca", "#7aa2f7", "#89ddff"]
+VIOLETAS = ["#bb9af7", "#9d7cd8", "#c3a6ff"]
+CALIDOS = ["#ff9e64", "#e0af68", "#f7768e", "#e06c9f"]
+HUMO = "#d5dcf7"
 
 rng = np.random.default_rng(SEED)
 
@@ -68,8 +70,10 @@ hy = CY + radio * np.sin(ang) * 0.72
 for x, y in zip(hx, hy):
     if -40 < x < W + 40 and -40 < y < H + 40:
         lado = rng.uniform(2.5, 6.0)
+        paleta_hit = FRIOS if rng.random() < 0.78 else VIOLETAS
         ax.add_patch(Rectangle((x, y), lado, lado,
-                               facecolor=rng.choice(AZULES), alpha=rng.uniform(0.10, 0.34),
+                               facecolor=rng.choice(paleta_hit),
+                               alpha=rng.uniform(0.16, 0.48),
                                edgecolor="none", zorder=2))
 
 # --- trazas -----------------------------------------------------------------
@@ -79,14 +83,17 @@ for i in range(N):
     largo = rng.uniform(H * 0.30, W * 0.72)
     curv = rng.normal(0, 1.0) * 0.0011
     p = rng.random()
-    if p < 0.06:
-        color, grosor, alpha = AMBAR, rng.uniform(1.4, 2.4), rng.uniform(0.40, 0.62)
-    elif p < 0.16:
-        color, grosor, alpha = LAVANDA, rng.uniform(1.0, 2.0), rng.uniform(0.28, 0.48)
-    elif p < 0.26:
-        color, grosor, alpha = HUMO, rng.uniform(0.7, 1.4), rng.uniform(0.18, 0.34)
+    if p < 0.20:
+        color, grosor, alpha = (rng.choice(CALIDOS), rng.uniform(1.3, 2.6),
+                                rng.uniform(0.45, 0.78))
+    elif p < 0.40:
+        color, grosor, alpha = (rng.choice(VIOLETAS), rng.uniform(1.0, 2.3),
+                                rng.uniform(0.38, 0.68))
+    elif p < 0.47:
+        color, grosor, alpha = HUMO, rng.uniform(0.7, 1.4), rng.uniform(0.22, 0.42)
     else:
-        color, grosor, alpha = rng.choice(AZULES), rng.uniform(0.8, 2.2), rng.uniform(0.22, 0.52)
+        color, grosor, alpha = (rng.choice(FRIOS), rng.uniform(0.9, 2.5),
+                                rng.uniform(0.34, 0.74))
     traza(theta0, largo, curv, color, grosor, alpha)
 
 # --- algunos "loopers": particulas de bajo momento que se enrollan -----------
@@ -94,31 +101,47 @@ for _ in range(5):
     theta0 = rng.uniform(0, 2 * np.pi)
     traza(theta0, rng.uniform(W * 0.30, W * 0.55),
           rng.choice([-1, 1]) * rng.uniform(0.0065, 0.0105),
-          rng.choice(AZULES), rng.uniform(0.9, 1.6), rng.uniform(0.20, 0.38))
+          rng.choice(FRIOS + VIOLETAS), rng.uniform(1.0, 1.8),
+          rng.uniform(0.30, 0.52))
 
 # --- vertice ----------------------------------------------------------------
-for radio_glow, alfa in [(95, 0.05), (62, 0.07), (34, 0.11), (16, 0.18)]:
-    ax.scatter([CX], [CY], s=radio_glow ** 2 / 2.4, color="#bcd3ff",
+for radio_glow, alfa, tono in [(120, 0.05, "#7aa2f7"), (95, 0.07, "#89ddff"),
+                               (62, 0.10, "#c3a6ff"), (34, 0.16, "#ffc9a0"),
+                               (16, 0.26, "#ffe0c0")]:
+    ax.scatter([CX], [CY], s=radio_glow ** 2 / 2.4, color=tono,
                alpha=alfa, edgecolors="none", zorder=5)
-ax.scatter([CX], [CY], s=42, color="#eaf1ff", alpha=0.85, edgecolors="none", zorder=6)
+ax.scatter([CX], [CY], s=52, color="#fff4e8", alpha=0.95, edgecolors="none", zorder=6)
+
+# --- velo degradado bajo el texto -------------------------------------------
+# Va por encima de las trazas (zorder 2-6) y por debajo del texto (8-9): el
+# lado derecho se oscurece lo justo para que el texto se lea sin tapar la
+# imagen.
+rampa = np.clip((xx / W - 0.40) / 0.42, 0, 1) ** 1.4
+velo = np.zeros((H, W, 4))
+velo[..., 0] = 0.039
+velo[..., 1] = 0.055
+velo[..., 2] = 0.141
+velo[..., 3] = rampa * 0.62
+ax.imshow(velo, extent=[0, W, 0, H], origin="lower", zorder=7,
+          interpolation="bilinear")
 
 # --- texto ------------------------------------------------------------------
 TX = W * 0.545
 ax.text(TX, H * 0.63, "HiggsNet", color="#eef2ff", fontsize=52,
         fontweight="bold", family="DejaVu Sans", ha="left", va="center",
         zorder=9, alpha=0.96)
-ax.text(TX, H * 0.63, "HiggsNet", color="#7aa2f7", fontsize=52,
+ax.text(TX, H * 0.63, "HiggsNet", color="#bb9af7", fontsize=52,
         fontweight="bold", family="DejaVu Sans", ha="left", va="center",
         zorder=8, alpha=0.30)
 
-ax.plot([TX, TX + 168], [H * 0.505, H * 0.505], color="#5ec8e5", lw=2.2,
-        alpha=0.55, zorder=9, solid_capstyle="round")
+ax.plot([TX, TX + 168], [H * 0.505, H * 0.505], color="#2ac3de", lw=2.6,
+        alpha=0.80, zorder=9, solid_capstyle="round")
 
-ax.text(TX, H * 0.425, "Deep ensembles sobre 11 millones", color="#9fb3e8",
+ax.text(TX, H * 0.425, "Deep ensembles sobre 11 millones", color="#c5d2f5",
         fontsize=15.5, family="DejaVu Sans", ha="left", va="center", zorder=9, alpha=0.92)
-ax.text(TX, H * 0.345, "de colisiones de partículas", color="#9fb3e8",
+ax.text(TX, H * 0.345, "de colisiones de partículas", color="#c5d2f5",
         fontsize=15.5, family="DejaVu Sans", ha="left", va="center", zorder=9, alpha=0.92)
-ax.text(TX, H * 0.235, "Bagging  ·  Optuna  ·  Stacking Ensemble", color="#d9a66c",
+ax.text(TX, H * 0.235, "Bagging  ·  Optuna  ·  Stacking Ensemble", color="#ff9e64",
         fontsize=11.5, family="DejaVu Sans", ha="left", va="center",
         zorder=9, alpha=0.72)
 
@@ -130,7 +153,7 @@ ax.imshow(grano, extent=[0, W, 0, H], origin="lower", cmap=None,
 
 vineta = np.clip(dist / 0.95, 0, 1) ** 2.1
 negro = np.zeros((H, W, 4))
-negro[..., 3] = vineta * 0.55
+negro[..., 3] = vineta * 0.38
 ax.imshow(negro, extent=[0, W, 0, H], origin="lower", zorder=11,
           interpolation="bilinear")
 
