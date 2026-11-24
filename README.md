@@ -36,7 +36,6 @@ memoria y cómputo de Google Colab (~12 GB de RAM, 12-24 h de entrenamiento acum
 
 ```
 Lab1-DL/
-├── docs/                  # Enunciado del laboratorio (PDF)
 ├── notebooks/
 │   ├── 00_codigo_base_profesor.ipynb   # Notebook de ejemplo, sin outputs (referencia)
 │   ├── 01_EDA_y_Preprocessing.ipynb    # Fase A: carga 1M filas, splits y EDA (ejecutado)
@@ -46,6 +45,9 @@ Lab1-DL/
 │   └── lab_base.py        # Mismo código base extraído a módulo reutilizable
 ├── data/                  # Datasets (ignorados por git)
 ├── checkpoints/           # Pesos .pt / best_model.pt (ignorados por git)
+├── docs/
+│   ├── enunciado_laboratorio_1.pdf
+│   └── REFERENCIAS.md     # Bibliografía verificada, con el uso de cada entrada
 ├── reports/               # Evidencia del informe, SÍ versionada
 │   ├── profiling/         # .html de ydata-profiling (compare train/val/test)
 │   ├── figures/           # EDA, PCA/t-SNE, curvas de loss, matrices de confusión
