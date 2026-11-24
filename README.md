@@ -39,7 +39,8 @@ Lab1-DL/
 ├── docs/                  # Enunciado del laboratorio (PDF)
 ├── notebooks/
 │   ├── 00_codigo_base_profesor.ipynb   # Notebook de ejemplo, sin outputs (referencia)
-│   └── 01_EDA_y_Preprocessing.ipynb    # Fase A: carga 1M filas, splits y EDA (listo para Colab)
+│   ├── 01_EDA_y_Preprocessing.ipynb    # Fase A: carga 1M filas, splits y EDA (ejecutado)
+│   └── 02_Modelos_Base.ipynb           # Fase B: feature engineering, Optuna y modelos base
 ├── src/
 │   └── lab_base.py        # Mismo código base extraído a módulo reutilizable
 ├── data/                  # Datasets (ignorados por git)
@@ -58,8 +59,10 @@ El enunciado permite entregar uno o varios `.ipynb`. Plan:
    submuestra de 1M filas, splits estratificados + `StandardScaler` sin data leakage, auditoría con
    `ydata-profiling compare`, EDA sobre el 10% y análisis no supervisado (PCA / t-SNE / K-Means).
    Incluye el análisis escrito de la auditoría y las conclusiones de la Fase A.
-2. ⬜ `02_Modelos_Base.ipynb` — búsqueda progresiva de hiperparámetros (10-20% de los datos),
-   entrenamiento final de los M modelos base con Bootstrap, checkpoints en Drive.
+2. ⬜ `02_Modelos_Base.ipynb` — **escrito, falta ejecutarlo** (~20-25 min): 23 variables
+   derivadas de la cinemática (51 features en total), búsqueda de hiperparámetros con **Optuna**
+   sobre el 20% de los datos con *pruning*, y entrenamiento de **3 modelos base** con muestreo
+   Bootstrap al 100%, con checkpoints en Drive.
 3. ⬜ `03_Stacking_Ensemble_Final.ipynb` — meta-red de Stacking, evaluación en test, conclusiones.
 
 ### Cómo ejecutar el notebook 01
