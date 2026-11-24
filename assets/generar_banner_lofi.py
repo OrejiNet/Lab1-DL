@@ -12,6 +12,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+import matplotlib.patheffects as pe
 from pathlib import Path
 
 W, H = 1200, 627
@@ -116,34 +117,43 @@ ax.scatter([CX], [CY], s=52, color="#fff4e8", alpha=0.95, edgecolors="none", zor
 # Va por encima de las trazas (zorder 2-6) y por debajo del texto (8-9): el
 # lado derecho se oscurece lo justo para que el texto se lea sin tapar la
 # imagen.
-rampa = np.clip((xx / W - 0.40) / 0.42, 0, 1) ** 1.4
+rampa = np.clip((xx / W - 0.33) / 0.38, 0, 1) ** 1.2
 velo = np.zeros((H, W, 4))
-velo[..., 0] = 0.039
-velo[..., 1] = 0.055
-velo[..., 2] = 0.141
-velo[..., 3] = rampa * 0.62
+velo[..., 0] = 0.027
+velo[..., 1] = 0.039
+velo[..., 2] = 0.106
+velo[..., 3] = rampa * 0.82
 ax.imshow(velo, extent=[0, W, 0, H], origin="lower", zorder=7,
           interpolation="bilinear")
 
 # --- texto ------------------------------------------------------------------
+# Cada linea lleva un contorno oscuro: con trazas claras pasando por detras,
+# el velo por si solo no garantiza contraste.
 TX = W * 0.545
-ax.text(TX, H * 0.63, "HiggsNet", color="#eef2ff", fontsize=52,
-        fontweight="bold", family="DejaVu Sans", ha="left", va="center",
-        zorder=9, alpha=0.96)
-ax.text(TX, H * 0.63, "HiggsNet", color="#bb9af7", fontsize=52,
-        fontweight="bold", family="DejaVu Sans", ha="left", va="center",
-        zorder=8, alpha=0.30)
+SOMBRA = "#070a1c"
 
-ax.plot([TX, TX + 168], [H * 0.505, H * 0.505], color="#2ac3de", lw=2.6,
-        alpha=0.80, zorder=9, solid_capstyle="round")
 
-ax.text(TX, H * 0.425, "Deep ensembles sobre 11 millones", color="#c5d2f5",
-        fontsize=15.5, family="DejaVu Sans", ha="left", va="center", zorder=9, alpha=0.92)
-ax.text(TX, H * 0.345, "de colisiones de partículas", color="#c5d2f5",
-        fontsize=15.5, family="DejaVu Sans", ha="left", va="center", zorder=9, alpha=0.92)
-ax.text(TX, H * 0.235, "Bagging  ·  Optuna  ·  Stacking Ensemble", color="#ff9e64",
-        fontsize=11.5, family="DejaVu Sans", ha="left", va="center",
-        zorder=9, alpha=0.72)
+def halo(ancho):
+    return [pe.withStroke(linewidth=ancho, foreground=SOMBRA)]
+
+
+ax.text(TX, H * 0.63, "HiggsNet", color="#f2f5ff", fontsize=52,
+        fontweight="bold", family="DejaVu Sans", ha="left", va="center",
+        zorder=9, alpha=1.0, path_effects=halo(7))
+
+ax.plot([TX, TX + 168], [H * 0.505, H * 0.505], color="#2ac3de", lw=3.0,
+        alpha=0.95, zorder=9, solid_capstyle="round",
+        path_effects=[pe.withStroke(linewidth=6, foreground=SOMBRA)])
+
+ax.text(TX, H * 0.425, "Deep ensembles sobre 11 millones", color="#dfe6ff",
+        fontsize=15.5, family="DejaVu Sans", ha="left", va="center",
+        zorder=9, alpha=1.0, path_effects=halo(4.5))
+ax.text(TX, H * 0.345, "de colisiones de partículas", color="#dfe6ff",
+        fontsize=15.5, family="DejaVu Sans", ha="left", va="center",
+        zorder=9, alpha=1.0, path_effects=halo(4.5))
+ax.text(TX, H * 0.235, "Bagging  ·  Optuna  ·  Stacking Ensemble", color="#ffb37a",
+        fontsize=12, family="DejaVu Sans", ha="left", va="center",
+        zorder=9, alpha=1.0, path_effects=halo(4))
 
 # --- grano de pelicula y vineta: la firma lo-fi -----------------------------
 grano = rng.normal(0, 1, (H, W, 1)).repeat(3, axis=2)
