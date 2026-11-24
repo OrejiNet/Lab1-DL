@@ -7,21 +7,18 @@
 Curso: **Fundamentos de Aprendizaje Profundo y Aplicaciones** — Semestre 2-2026
 Profesor: Francisco Muñoz (`francisco.munoz.b@usach.cl`)
 Entrega: **22 de noviembre de 2026** (prórroga; el enunciado en `docs/` aún dice 17 de noviembre)
-— por correo, con asunto `Lab 1 - DL - [NUMERO GRUPO]`
-
-> **Por definir:** número de grupo, integrantes y dataset elegido. Completar la tabla de abajo
-> antes de la entrega.
+— por correo a `francisco.munoz.b@usach.cl`, con asunto `Lab 1 - DL - 6`
 
 | | |
 |---|---|
-| N° de grupo | _por definir_ |
-| Integrantes | _por definir_ |
+| N° de grupo | **6** |
+| Integrante | **Cristopher Angulo Ahumada** (trabajo individual) |
 | Opción de problema | **B — Predicción Científica / Series de Sensores Industriales** |
 | Dataset | **HIGGS Boson Dataset** — [UCI ML Repository, id 280](https://archive.ics.uci.edu/dataset/280/higgs) |
 | Tarea | Clasificación binaria: señal (bosón de Higgs) vs. fondo |
 | Volumen | 11.000.000 de filas disponibles → se usa una **submuestra aleatoria de 1.000.000** |
 | Dimensionalidad | **28 features** (21 cinemáticas de bajo nivel + 7 masas invariantes de alto nivel) |
-| Modelos base exigidos | _según tamaño del grupo: 1 → 2-3, 2 → 4-5, 3 → 6-8_ |
+| Modelos base exigidos | **2 a 3** (corresponde a un grupo de 1 integrante) |
 
 > **Nota sobre el requisito de ≥ 40 columnas:** HIGGS tiene 28 features, por debajo del mínimo
 > que fija el enunciado. El profesor autorizó expresamente usarlo así, dado que el volumen de
@@ -57,9 +54,10 @@ Lab1-DL/
 
 El enunciado permite entregar uno o varios `.ipynb`. Plan:
 
-1. ✅ `01_EDA_y_Preprocessing.ipynb` — descarga por *chunks*, submuestra de 1M filas, splits
-   estratificados + `StandardScaler` sin data leakage, auditoría con `ydata-profiling compare`,
-   EDA sobre el 10% y análisis no supervisado (PCA / t-SNE / K-Means). **Falta ejecutarlo en Colab.**
+1. ✅ `01_EDA_y_Preprocessing.ipynb` — **ejecutado de principio a fin**: descarga por *chunks*,
+   submuestra de 1M filas, splits estratificados + `StandardScaler` sin data leakage, auditoría con
+   `ydata-profiling compare`, EDA sobre el 10% y análisis no supervisado (PCA / t-SNE / K-Means).
+   Incluye el análisis escrito de la auditoría y las conclusiones de la Fase A.
 2. ⬜ `02_Modelos_Base.ipynb` — búsqueda progresiva de hiperparámetros (10-20% de los datos),
    entrenamiento final de los M modelos base con Bootstrap, checkpoints en Drive.
 3. ⬜ `03_Stacking_Ensemble_Final.ipynb` — meta-red de Stacking, evaluación en test, conclusiones.
