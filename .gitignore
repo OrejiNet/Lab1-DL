@@ -11,10 +11,15 @@ checkpoints/**
 *.pth
 *.ckpt
 
-# ---- Reportes pesados generados ----
+# ---- Reportes generados ----
+# Se versiona la evidencia del informe (figuras, tablas y el reporte de
+# profiling), porque es parte de la entrega y pesa poco. Lo demas, no.
 reports/**
 !reports/**/
 !reports/**/.gitkeep
+!reports/figures/*.png
+!reports/tables/*.csv
+!reports/profiling/*.html
 
 # ---- Archivos de datos sueltos ----
 *.csv

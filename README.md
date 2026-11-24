@@ -46,11 +46,23 @@ Lab1-DL/
 │   └── lab_base.py        # Mismo código base extraído a módulo reutilizable
 ├── data/                  # Datasets (ignorados por git)
 ├── checkpoints/           # Pesos .pt / best_model.pt (ignorados por git)
-├── reports/
+├── reports/               # Evidencia del informe, SÍ versionada
 │   ├── profiling/         # .html de ydata-profiling (compare train/val/test)
-│   └── figures/           # Curvas de loss, matrices de confusión, PCA/t-SNE
+│   ├── figures/           # EDA, PCA/t-SNE, curvas de loss, matrices de confusión
+│   └── tables/            # Comparación final de predictores en Test (.csv)
 └── requirements.txt
 ```
+
+### Dónde queda cada cosa
+
+Los notebooks separan los artefactos según su función:
+
+| Tipo | Destino | Versionado |
+|---|---|---|
+| Submuestra `.parquet`, splits `.npz`, pesos `.pt` | Google Drive si está disponible, si no el repositorio | No: son pesados y reproducibles |
+| Figuras, tablas y reporte de profiling | **Siempre** `reports/` dentro del repositorio | Sí: son la evidencia de la entrega |
+
+El `.csv.gz` de 2,6 GB del dataset se descarga siempre a disco local y no se sincroniza a Drive.
 
 ### Notebooks de entrega (a crear)
 
