@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/higgsnet_banner.png" alt="HiggsNet — deep ensembles sobre 11 millones de colisiones de partículas" width="840">
+</p>
+
 # Laboratorio 1 — Aprendizaje Profundo a Gran Escala y Ensembles
 
 Curso: **Fundamentos de Aprendizaje Profundo y Aplicaciones** — Semestre 2-2026
