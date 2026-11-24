@@ -44,7 +44,7 @@ Lab1-DL/
 ├── src/
 │   └── lab_base.py        # Mismo código base extraído a módulo reutilizable
 ├── data/                  # Datasets (ignorados por git)
-├── checkpoints/           # Pesos .pt / best_model.pt (ignorados por git)
+├── checkpoints/           # Pesos .pt del ensamble (versionados: 1,1 MB)
 ├── docs/
 │   ├── enunciado_laboratorio_1.pdf
 │   └── REFERENCIAS.md     # Bibliografía verificada, con el uso de cada entrada
@@ -63,7 +63,7 @@ Los notebooks separan los artefactos según su función:
 |---|---|---|
 | Submuestra `.parquet` (62,6 MB) | ✅ | ❌ se regenera |
 | Splits escalados `.npz` (113 MB) | ✅ | ❌ excede el límite de 100 MB por archivo de GitHub |
-| Pesos `.pt` de los modelos base | ✅ | ❌ se regeneran |
+| Pesos `.pt` del ensamble (1,1 MB) | ✅ | ✅ **versionados**, para que el notebook 03 sea reproducible |
 | Figuras, tablas y reporte de profiling | ✅ copia de respaldo | ✅ **versionadas** |
 
 La evidencia del informe se guarda en **los dos** destinos. El repositorio es el primario —es lo
@@ -71,9 +71,14 @@ que se versiona y por donde se revisa el trabajo— y la copia a Drive la hace l
 `espejar()`, archivo por archivo en el momento de escribirlo, de modo que una interrupción no deje
 el respaldo incompleto.
 
-Los artefactos pesados viven solo en Drive por dos razones: se regeneran de forma determinista a
+Los datos procesados viven solo en Drive por dos razones: se regeneran de forma determinista a
 partir del código y las semillas fijadas, y el archivo de particiones excede por sí solo el límite
 de 100 MB por archivo que impone GitHub.
+
+Los **pesos sí se versionan**, aunque también se regeneren. Pesan 1,1 MB entre los cuatro y sin
+ellos el notebook 03 no es reproducible por quien clone el repositorio: los checkpoints que carga
+viven en el Drive del autor. Con ellos, basta ejecutar ese notebook para verificar los resultados
+del ensamble sin repetir los 32 minutos de entrenamiento.
 
 El `.csv.gz` de 2,6 GB del dataset se descarga siempre a disco local y no se sincroniza a Drive: es
 un insumo temporal que se lee una sola vez.

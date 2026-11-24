@@ -10,16 +10,13 @@ checkpoints/**
 *.pt
 *.pth
 *.ckpt
-
-# ---- Reportes generados ----
-# Se versiona la evidencia del informe (figuras, tablas y el reporte de
-# profiling), porque es parte de la entrega y pesa poco. Lo demas, no.
-reports/**
-!reports/**/
-!reports/**/.gitkeep
-!reports/figures/*.png
-!reports/tables/*.csv
-!reports/profiling/*.html
+# Excepcion: los pesos finales del ensamble (1,1 MB en total). Sin ellos el
+# notebook 03 no es reproducible por quien clone el repositorio, porque los
+# checkpoints viven en el Drive del autor. Cualquier otro .pt queda fuera.
+# Van despues de *.pt a proposito: en .gitignore gana la ultima regla que
+# coincide.
+!checkpoints/modelo_base_?.pt
+!checkpoints/meta_stacking.pt
 
 # ---- Archivos de datos sueltos ----
 *.csv
