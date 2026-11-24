@@ -57,12 +57,24 @@ Lab1-DL/
 
 Los notebooks separan los artefactos según su función:
 
-| Tipo | Destino | Versionado |
+| Tipo | Drive | Repositorio (GitHub) |
 |---|---|---|
-| Submuestra `.parquet`, splits `.npz`, pesos `.pt` | Google Drive si está disponible, si no el repositorio | No: son pesados y reproducibles |
-| Figuras, tablas y reporte de profiling | **Siempre** `reports/` dentro del repositorio | Sí: son la evidencia de la entrega |
+| Submuestra `.parquet` (62,6 MB) | ✅ | ❌ se regenera |
+| Splits escalados `.npz` (113 MB) | ✅ | ❌ excede el límite de 100 MB por archivo de GitHub |
+| Pesos `.pt` de los modelos base | ✅ | ❌ se regeneran |
+| Figuras, tablas y reporte de profiling | ✅ copia de respaldo | ✅ **versionadas** |
 
-El `.csv.gz` de 2,6 GB del dataset se descarga siempre a disco local y no se sincroniza a Drive.
+La evidencia del informe se guarda en **los dos** destinos. El repositorio es el primario —es lo
+que se versiona y por donde se revisa el trabajo— y la copia a Drive la hace la función
+`espejar()`, archivo por archivo en el momento de escribirlo, de modo que una interrupción no deje
+el respaldo incompleto.
+
+Los artefactos pesados viven solo en Drive por dos razones: se regeneran de forma determinista a
+partir del código y las semillas fijadas, y el archivo de particiones excede por sí solo el límite
+de 100 MB por archivo que impone GitHub.
+
+El `.csv.gz` de 2,6 GB del dataset se descarga siempre a disco local y no se sincroniza a Drive: es
+un insumo temporal que se lee una sola vez.
 
 ### Notebooks de entrega (a crear)
 
