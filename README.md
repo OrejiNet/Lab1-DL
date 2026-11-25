@@ -6,7 +6,7 @@
 
 Curso: **Fundamentos de Aprendizaje Profundo y Aplicaciones** — Semestre 2-2026
 Profesor: Francisco Muñoz (`francisco.munoz.b@usach.cl`)
-Entrega: **22 de noviembre de 2026** por correo, con asunto `Lab 1 - DL - 6`
+Entrega: **24 de noviembre de 2026** por correo, con asunto `Lab 1 - DL - 6`
 
 | | |
 |---|---|
